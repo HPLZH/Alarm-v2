@@ -17,7 +17,7 @@ namespace Alarm_v2
             writer.WriteLine($"[{now:HH:mm:ss}] {text}");
             if (File.Exists(HistoryPath))
             {
-                File.AppendAllText(HistoryPath, $"[{now:yyyy-MM-dd HH:mm:ss}] {text}");
+                File.AppendAllText(HistoryPath, $"[{now:yyyy-MM-dd HH:mm:ss}] {text}\n");
             }
         }
 

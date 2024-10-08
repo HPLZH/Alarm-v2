@@ -83,6 +83,8 @@ run C:\path\of\playlist.txt 00000000-0000-0000-0000-000000000000 -pb pb.json -pl
 
 其中，`history.log` 是历史记录文件的路径（相对于可执行文件的位置），可以更改
 
+> 此功能默认启用，路径为`history.log`。要禁用，请将路径改为`nul`
+
 此时你的编辑器里应该像是：
 ```
 run C:\path\of\playlist.txt 00000000-0000-0000-0000-000000000000 -pb pb.json -pl -log history.log

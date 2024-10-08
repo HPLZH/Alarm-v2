@@ -6,7 +6,7 @@
     public class PL
     {
         readonly List<string> mlist = [];
-        readonly Tree tree = new();
+        public readonly Tree tree = new();
         string[] last = [];
         public double ADCC { get; private set; } = 0;
         bool adccChanged = true;

@@ -136,5 +136,30 @@
             else
                 return (double)c / n;
         }
+
+        public static void PrintTree(this Tree tree,string name, Action<Tree>? action = null, int sp = 2)
+        {
+            string pth = name;
+            if(tree.Children.Count == 1 && tree.Children.Count(kvp => kvp.Value is Tree) == 1)
+            {
+                foreach(var kvp in tree.Children)
+                {
+                    (kvp.Value as Tree)?.PrintTree(Path.Combine(pth, kvp.Key), action, sp);
+                }
+            }
+            else
+            {
+                IO.CWrite(pth);
+                action?.Invoke(tree);
+                int x = Console.CursorLeft;
+                Console.WriteLine();
+                Console.CursorLeft = x + sp;
+                foreach (var kvp in tree.Children.OrderByDescending(kvp => kvp.Value.Count))
+                {
+                    (kvp.Value as Tree)?.PrintTree(kvp.Key, action, sp);
+                }
+                Console.CursorLeft = x;
+            }
+        }
     }
 }

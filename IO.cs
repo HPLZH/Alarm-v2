@@ -31,5 +31,18 @@ namespace Alarm_v2
         {
             return writer.ToString();
         }
+
+        public static void CWrite(string text)
+        {
+            (int l, int t) = Console.GetCursorPosition();
+            Console.Write(text);
+            Console.SetCursorPosition(l, t);
+        }
+
+        public static void CWrite(string text, int left, int top)
+        {
+            Console.Write(text);
+            Console.SetCursorPosition(left, top);
+        }
     }
 }

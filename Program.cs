@@ -161,23 +161,50 @@ ls.AddCommand(ld);
 
 var lpb = new Command("pb", "查看 PB 数据");
 var lpb_pbf = new Argument<FileInfo>("pb", "PB 数据文件 [json]");
+var name_width = new Option<int>("--name-width", () => Console.WindowWidth / 2, "名称部分长度");
+name_width.AddAlias("-w");
 lpb.AddArgument(lpb_pbf);
-lpb.SetHandler((FileInfo pbf1) =>
+lpb.AddOption(name_width);
+lpb.SetHandler((FileInfo pbf1, int nw) =>
 {
     PB pb1 = new(pbf1.FullName, () => "");
     const int lnT = 4;
     const int lnP = 8;
-    int lnN = Console.WindowWidth * 2 / 3;
-    Console.WriteLine($"{"文件名".PadRight(lnN-3)} 计时 通过概率");
-    Console.WriteLine($"{"".PadLeft(lnN, '-')} ---- --------");
+    Console.WriteLine($"{"文件名".PadRight(nw-3)} 计时 通过概率");
+    Console.WriteLine($"{"".PadLeft(nw, '-')} ---- --------");
     foreach(var (fn, t) in pb1.GetData())
     {
-        Console.Write(fn.PadRight(lnN - fn.Count(c => !char.IsAscii(c))));
-        Console.CursorLeft = lnN;
-        Console.WriteLine($" {t,lnT} {PB.P(t),lnP:P2}".PadRight(Console.WindowWidth - lnN));
+        Console.Write(fn.PadRight(nw - fn.Count(c => !char.IsAscii(c))));
+        Console.CursorLeft = nw;
+        Console.WriteLine($" {t,lnT} {PB.P(t),lnP:P2}".PadRight(Console.WindowWidth - nw));
     }
-}, lpb_pbf);
+}, lpb_pbf, name_width);
 ls.AddCommand(lpb);
+
+var lpl = new Command("pl", "查看 PL 分析信息");
+lpl.AddArgument(playlist);
+lpl.AddOption(name_width);
+
+lpl.SetHandler((FileInfo playlist2, int nw) =>
+{
+    string[] li2 = M3u8.ReadList(playlist2.FullName);
+    PL pl = new();
+    pl.Add(li2);
+    double adcc = pl.CalcuateADCC();
+    Console.WriteLine();
+    Console.WriteLine($"ADCC = {adcc:F2}");
+    Console.WriteLine();
+    Console.WriteLine($"{"Path".PadRight(nw)} Count   DCC");
+    Console.WriteLine($"{"".PadLeft(nw, '-')} ----- -----");
+    pl.tree.PrintTree("", (tree) =>
+    {
+        (int l, int t) = Console.GetCursorPosition();
+        Console.CursorLeft = nw;
+        int dcc = tree.DirectChildrenCount();
+        IO.CWrite($" {(dcc == tree.Count ? null : tree.Count),5} {(dcc == 0 ? null: dcc),5}", l, t);
+    });
+}, playlist, name_width);
+ls.AddCommand(lpl);
 
 root.Invoke(args);
 

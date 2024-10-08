@@ -9,9 +9,10 @@ var root = new RootCommand();
 // ROOT
 var run = new Command("run", "运行闹钟");
 var rc = new Command("rc", "运行远程控制程序");
-var ld = new Command("list", "列出音频设备");
+var ls = new Command("show", "查看...");
 root.AddCommand(run);
 root.AddCommand(rc);
+root.AddCommand(ls);
 
 // RUN
 var playlist = new Argument<FileInfo>("playlist", "播放列表文件");
@@ -150,11 +151,33 @@ rc.SetHandler(uristr =>
     });
 }, uri);
 
-// LIST
+// SHOW
+var ld = new Command("devices", "查看音频设备");
 ld.SetHandler(() =>
 {
     VolumeHelper.ListDevice(Console.WriteLine);
 });
+ls.AddCommand(ld);
+
+var lpb = new Command("pb", "查看 PB 数据");
+var lpb_pbf = new Argument<FileInfo>("pb", "PB 数据文件 [json]");
+lpb.AddArgument(lpb_pbf);
+lpb.SetHandler((FileInfo pbf1) =>
+{
+    PB pb1 = new(pbf1.FullName, () => "");
+    const int lnT = 4;
+    const int lnP = 8;
+    int lnN = Console.WindowWidth * 2 / 3;
+    Console.WriteLine($"{"文件名".PadRight(lnN-3)} 计时 通过概率");
+    Console.WriteLine($"{"".PadLeft(lnN, '-')} ---- --------");
+    foreach(var (fn, t) in pb1.GetData())
+    {
+        Console.Write(fn.PadRight(lnN - fn.Count(c => !char.IsAscii(c))));
+        Console.CursorLeft = lnN;
+        Console.WriteLine($" {t,lnT} {PB.P(t),lnP:P2}".PadRight(Console.WindowWidth - lnN));
+    }
+}, lpb_pbf);
+ls.AddCommand(lpb);
 
 root.Invoke(args);
 

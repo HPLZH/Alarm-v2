@@ -45,11 +45,23 @@ namespace Alarm_v2
 
         static string NameOf(string path) => Path.GetFileNameWithoutExtension(path);
 
+        const double p0 = 0.8;
+        const double dt = 10;
+        const int ct = 10;
+
+        public static double P(int x)
+        {
+            return Math.Pow(p0, Math.Ceiling(x / (double)ct));
+        }
+
+        public IEnumerable<KeyValuePair<string,int>> GetData()
+        {
+            return timeCount.OrderByDescending(x => x.Value);
+            
+        }
+
         public string GetItem()
         {
-            const double p0 = 0.8;
-            const double dt = 10;
-            const int ct = 10;
             string r;
             bool h;
 
@@ -100,6 +112,10 @@ namespace Alarm_v2
                     if (timeCount[k] > 0)
                     {
                         timeCount[k]--;
+                    }
+                    else
+                    {
+                        timeCount.Remove(k);
                     }
                     pCount[k] = 0;
                 }

@@ -206,6 +206,14 @@ lpl.SetHandler((FileInfo playlist2, int nw) =>
 }, playlist, name_width);
 ls.AddCommand(lpl);
 
+var lic = new Command("license", "查看许可证");
+var dep = new Command("deps", "查看依赖项信息");
+lic.SetHandler(License.Show);
+dep.SetHandler(License.ShowDeps);
+ls.AddCommand(lic);
+ls.AddCommand(dep);
+
+
 root.Invoke(args);
 
 void ConsoleHandler(Action onPass, Action onStop)

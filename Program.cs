@@ -174,7 +174,7 @@ lpb.SetHandler((FileInfo pbf1, int nw) =>
     Console.WriteLine($"{"".PadLeft(nw, '-')} ---- --------");
     foreach(var (fn, t) in pb1.GetData())
     {
-        Console.Write(fn.PadRight(nw - fn.Count(c => !char.IsAscii(c))));
+        Console.Write(fn);
         Console.CursorLeft = nw;
         Console.WriteLine($" {t,lnT} {PB.P(t),lnP:P2}".PadRight(Console.WindowWidth - nw));
     }

@@ -1,10 +1,11 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Alarm_v2
 {
     public class Config
     {
-        static JsonSerializerOptions serializerOptions = new()
+        internal static JsonSerializerOptions serializerOptions = new()
         {
             IncludeFields = true,
             WriteIndented = true,
@@ -25,6 +26,9 @@ namespace Alarm_v2
         public FileInfo? PBFile() => pb is null ? null : new(pb);
         public FileInfo? LogFile() => log is null ? null : new(log);
 
+        public Shell? shell = null;
+        public ExtraContent[] extra = [];
+
         public Config() { }
 
         public static Config? Deserialize(FileInfo file)
@@ -36,6 +40,24 @@ namespace Alarm_v2
         public string Serialize()
         {
             return JsonSerializer.Serialize(this, serializerOptions);
+        }
+
+        public List<string> GetExtraContent()
+        {
+            List<string> content = [];
+            foreach (var item in extra)
+            {
+                bool chr;
+                foreach(var l in item.GetContent(shell ?? NullShell.Shared, out chr))
+                {
+                    content.Add(l);
+                }
+                if(chr && item.stopIfTrue)
+                {
+                    break;
+                }
+            }
+            return content;
         }
     }
 }

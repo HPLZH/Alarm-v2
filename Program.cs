@@ -5,6 +5,7 @@ using static Alarm_v2.AppConfig;
 
 Environment.CurrentDirectory = Path.GetDirectoryName(Environment.ProcessPath) ?? Environment.CurrentDirectory;
 var root = new RootCommand();
+Config? sharedConfig = null;
 
 // ROOT
 var run = new Command("run", "运行闹钟");
@@ -27,6 +28,7 @@ start.AddArgument(conf);
 start.SetHandler((FileInfo fc) =>
 {
     var config = Config.Deserialize(fc) ?? throw new NullReferenceException("配置文件无效");
+    sharedConfig = config;
     MainHandler(
         config.PlayList(),
         config.device,
@@ -235,8 +237,25 @@ void MainHandler(
         plnx :
         pb.GetItem;
 
+    // 建立额外内容列表
+    List<string> extl = [];
+    Func<string> exnx = sharedConfig is null ?
+        pbnx :
+        () => {
+            if (extl.Count > 0)
+            {
+                string f = extl[0];
+                extl.RemoveAt(0);
+                return f;
+            }
+            else
+            {
+                return pbnx.Invoke();
+            }
+        };
+
     // 构建主控制器
-    Controller ctrl = new(player, pbnx);
+    Controller ctrl = new(player, exnx);
 
     // 将 PB 组件连接到控制器
     if (pb is not null)
@@ -278,6 +297,12 @@ void MainHandler(
         io.WriteText($"PB Path     : {pbf.FullName}");
     }
     io.WriteText("");
+
+    // 获取额外内容
+    if(sharedConfig is not null)
+    {
+        extl = sharedConfig.GetExtraContent();
+    }
 
     // 启动
     ctrl.Start();

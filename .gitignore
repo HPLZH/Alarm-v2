@@ -5,6 +5,7 @@
 
 /sign.cmd
 /Properties/launchSettings.json
+/test.json
 
 # User-specific files
 *.rsuser

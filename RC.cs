@@ -24,20 +24,28 @@ namespace Alarm_v2
                     {
                         var response = await client.GetStringAsync(uri);
                         if (response.StartsWith(text))
-                            Console.SetCursorPosition(0, 0);
+                        {
+                            Console.Write(response[text.Length..]);
+                        }
                         else
+                        {
                             Console.Clear();
-                        Console.WriteLine(response);
+                            Console.Write(response);
+                        }
                         text = response;
                     }
                     catch (Exception ex)
                     {
                         string errtext = ex.Message + "\n" + ex.StackTrace;
                         if (errtext.StartsWith(text))
-                            Console.SetCursorPosition(0, 0);
+                        {
+                            Console.Write(errtext[text.Length..]);
+                        }
                         else
+                        {
                             Console.Clear();
-                        Console.WriteLine(errtext);
+                            Console.Write(errtext);
+                        }
                         text = errtext;
                     }
                     await Task.Delay(Interval);

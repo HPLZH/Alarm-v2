@@ -260,7 +260,7 @@ void MainHandler(
     // 将 PB 组件连接到控制器
     if (pb is not null)
     {
-        ctrl.OnSec += pb.IncAsync;
+        ctrl.OnSec += pb.Inc_2;
         ctrl.BeforeNext += (_) => pb.Save();
         OnExit += (_) => pb.Save();
     }

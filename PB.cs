@@ -14,6 +14,9 @@ namespace Alarm_v2
         readonly Func<string> provider;
         readonly string fp;
 
+        string currentPath = string.Empty;
+        int currentTime = 0;
+
         public PB(string path, Func<string> provider)
         {
             fp = path;
@@ -54,17 +57,17 @@ namespace Alarm_v2
             return Math.Pow(p0, Math.Ceiling(x / (double)ct));
         }
 
-        public IEnumerable<KeyValuePair<string,int>> GetData()
+        public IEnumerable<KeyValuePair<string, int>> GetData()
         {
             return timeCount.OrderByDescending(x => x.Value);
-            
+
         }
 
         public string GetItem()
         {
             string r;
             bool h;
-
+            IncHandler();
             do
             {
                 r = provider.Invoke();
@@ -122,8 +125,36 @@ namespace Alarm_v2
             }
         }
 
+        public void Inc_2(string path)
+        {
+            if (currentPath == path)
+            {
+                currentTime++;
+            }
+            else if(currentPath == string.Empty)
+            {
+                currentPath = path;
+                currentTime = 1;
+            }
+            else
+            {
+                IncHandler();
+                Inc_2(path);
+            }
+        }
+
+        public void IncHandler()
+        {
+            for (; currentTime > 0; currentTime--)
+            {
+                Inc(currentPath);
+            }
+            currentPath = string.Empty;
+        }
+
         public void Save()
         {
+            IncHandler();
             File.WriteAllText(fp, JsonSerializer.Serialize(timeCount), Encoding.UTF8);
         }
     }

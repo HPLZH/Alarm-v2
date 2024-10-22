@@ -14,8 +14,8 @@
 
 ## 使用指南
 
-[使用指南-命令行参数](Guide.md)
-[使用指南-配置文件](Guide-ConfigFile.md)
+[使用指南-命令行参数](docs/Guide.md)
+[使用指南-配置文件](docs/Guide-ConfigFile.md)
 
 内置帮助：
 ```pwsh

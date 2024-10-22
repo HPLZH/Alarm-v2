@@ -218,7 +218,7 @@ void MainHandler(
 
     // 初始化播放器
     DirectSoundOut outDevice = new(dev);
-    Player player = new(outDevice);
+    Player player = new(outDevice, sharedConfig?.opts?.memstream ?? false);
 
     // 列出设备
     VolumeHelper.ListDevice(io.WriteText);

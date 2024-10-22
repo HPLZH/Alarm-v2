@@ -11,6 +11,7 @@ namespace Alarm_v2
             WriteIndented = true,
             AllowTrailingCommas = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
+            UnmappedMemberHandling = JsonUnmappedMemberHandling.Skip,
         };
 
         public required string playlist;
@@ -21,6 +22,8 @@ namespace Alarm_v2
         public bool pl = false;
         public string[] pfx = [];
         public string? log;
+
+        public ExperimentalOptions? opts;
 
         public FileInfo PlayList() => new(playlist);
         public FileInfo? PBFile() => pb is null ? null : new(pb);
@@ -58,6 +61,11 @@ namespace Alarm_v2
                 }
             }
             return content;
+        }
+
+        public class ExperimentalOptions
+        {
+            public bool memstream = false;
         }
     }
 }

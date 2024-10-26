@@ -217,6 +217,19 @@ void MainHandler(
     string[] list = M3u8.ReadList(lf.FullName);
 
     // 初始化播放器
+    bool devex = false;
+    foreach(var d in DirectSoundOut.Devices)
+    {
+        if(d.Guid == dev)
+        {
+            devex = true;
+            break;
+        }
+    }
+    if (!devex)
+    {
+        dev = Guid.Empty;
+    }
     DirectSoundOut outDevice = new(dev);
     Player player = new(outDevice, sharedConfig?.opts?.memstream ?? false);
 
@@ -297,6 +310,11 @@ void MainHandler(
         io.WriteText($"PB Path     : {pbf.FullName}");
     }
     io.WriteText("");
+
+    if (!devex)
+    {
+        io.WriteText("<Wraning> 指定的设备不存在\n");
+    }
 
     // 获取额外内容
     if(sharedConfig is not null)

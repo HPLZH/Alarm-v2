@@ -230,7 +230,7 @@ void MainHandler(
     {
         dev = Guid.Empty;
     }
-    DirectSoundOut outDevice = new(dev);
+    DirectSoundOut outDevice = new(dev, 1000);
     Player player = new(outDevice, sharedConfig?.opts?.memstream ?? false);
 
     // 列出设备

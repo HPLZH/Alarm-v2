@@ -107,7 +107,12 @@
             }
         },
         "mapping": {
-            "type": "object"
+            "type": "object",
+            "patternProperties": {
+                "": {
+                    "type": "string"
+                }
+            }
         }
     },
     "required": [

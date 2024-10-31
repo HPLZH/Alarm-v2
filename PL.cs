@@ -1,11 +1,15 @@
-﻿namespace Alarm_v2
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Alarm_v2
 {
     /// <summary>
     /// 防近似过滤模块 v2
     /// </summary>
-    public class PL
+    public class PL(Mapping mapping)
     {
         readonly List<string> mlist = [];
+        string[]? mplist = null;
+        readonly Mapping _map = mapping;
         public readonly Tree tree = new();
         string[] last = [];
         public double ADCC { get; private set; } = 0;
@@ -13,25 +17,38 @@
 
         public string GetItem()
         {
-            if (mlist.Count == 0) return string.Empty;
-            string r;
+            if (mplist == null)
+            {
+                ReMap();
+            }
+            if (mplist.Length == 0) return string.Empty;
+            string rt;
             double x;
             string[] c;
             string[] p;
             int k;
             int dcc;
+            double dx;
+            double dx0;
             do
             {
-                r = mlist[Random.Shared.Next(mlist.Count)];
+                k = 0;
+                dx = 1;
+                rt = mplist[Random.Shared.Next(mplist.Length)];
+                _map.Resolve(rt, out string[] rl);
+                foreach(var r in rl)
+                {
+                    c = SplitPath(r);
+                    p = Parent(c, last);
+                    k = tree.GetNode(p)?.Count ?? 0;
+                    dcc = ((Tree?)tree.GetNode(c[..^1]))?.DirectChildrenCount() ?? 0;
+                    dx0 = (double)(k - 1) / mplist.Length / DCCPunishment(dcc);
+                    dx = Math.Min(dx0, dx);
+                }
                 x = Random.Shared.NextDouble();
-                c = SplitPath(r);
-                p = Parent(c, last);
-                k = tree.GetNode(p)?.Count ?? 0;
-                dcc = ((Tree?)tree.GetNode(c[..^1]))?.DirectChildrenCount() ?? 0;
             }
-            while (k != 0 && x > (double)(k - 1) / mlist.Count / DCCPunishment(dcc));
-            last = c;
-            return r;
+            while (k != 0 && x > dx);
+            return rt;
         }
 
         public void Add(IEnumerable<string> paths)
@@ -42,6 +59,17 @@
                 tree.AddEndPath(SplitPath(path));
                 adccChanged = true;
             }
+        }
+
+        public void SetLast(string path)
+        {
+            last = SplitPath(path);
+        }
+
+        [MemberNotNull(nameof(mplist))]
+        public void ReMap()
+        {
+            mplist = _map.Map(mlist).ToArray();
         }
 
         public double DCCPunishment(int dcc)

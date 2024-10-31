@@ -15,6 +15,7 @@ namespace Alarm_v2
         readonly string fp;
 
         string currentPath = string.Empty;
+        string currentMapped = string.Empty;
         int currentTime = 0;
 
         public PB(string path, Func<string> provider)
@@ -46,7 +47,10 @@ namespace Alarm_v2
             }
         }
 
-        static string NameOf(string path) => Path.GetFileNameWithoutExtension(path);
+        public static string NameOf(string path) =>
+            path.ToLower().StartsWith("mapped://") ?
+            path :
+            Path.GetFileNameWithoutExtension(path);
 
         const double p0 = 0.8;
         const double dt = 10;
@@ -101,45 +105,49 @@ namespace Alarm_v2
             await Task.Run(() => Inc(path));
         }
 
-        public void Inc(string path)
+        public void Inc(string path, bool noTimePassed = false)
         {
             const double p0 = 0.006;
             const int x0 = 73;
             const double dp = 0.06;
             timeCount[NameOf(path)] = timeCount.GetValueOrDefault(NameOf(path), 0) + 1;
-            foreach (var k in timeCount.Keys)
+            if(!noTimePassed)
             {
-                pCount[k] = pCount.GetValueOrDefault(NameOf(k), 0) + 1;
-                if (Random.Shared.NextDouble() < p0 + (pCount[k] > x0 ? pCount[k] - x0 : 0) * dp)
+                foreach (var k in timeCount.Keys)
                 {
-                    if (timeCount[k] > 0)
+                    pCount[k] = pCount.GetValueOrDefault(NameOf(k), 0) + 1;
+                    if (Random.Shared.NextDouble() < p0 + (pCount[k] > x0 ? pCount[k] - x0 : 0) * dp)
                     {
-                        timeCount[k]--;
+                        if (timeCount[k] > 0)
+                        {
+                            timeCount[k]--;
+                        }
+                        else
+                        {
+                            timeCount.Remove(k);
+                        }
+                        pCount[k] = 0;
                     }
-                    else
-                    {
-                        timeCount.Remove(k);
-                    }
-                    pCount[k] = 0;
                 }
             }
         }
 
-        public void Inc_2(string path)
+        public void Inc_2(string path, string mapped)
         {
-            if (currentPath == path)
+            if (currentPath == path && currentMapped == mapped)
             {
                 currentTime++;
             }
             else if(currentPath == string.Empty)
             {
                 currentPath = path;
+                currentMapped = mapped;
                 currentTime = 1;
             }
             else
             {
                 IncHandler();
-                Inc_2(path);
+                Inc_2(path, mapped);
             }
         }
 
@@ -148,8 +156,13 @@ namespace Alarm_v2
             for (; currentTime > 0; currentTime--)
             {
                 Inc(currentPath);
+                if(NameOf(currentPath) != NameOf(currentMapped))
+                {
+                    Inc(currentMapped, true);
+                }
             }
             currentPath = string.Empty;
+            currentMapped = string.Empty;
         }
 
         public void Save()

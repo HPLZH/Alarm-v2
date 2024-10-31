@@ -151,7 +151,7 @@ lpl.AddOption(name_width);
 lpl.SetHandler((FileInfo playlist2, int nw) =>
 {
     string[] li2 = M3u8.ReadList(playlist2.FullName);
-    PL pl = new();
+    PL pl = new(new Mapping([]));
     pl.Add(li2);
     double adcc = pl.CalcuateADCC();
     Console.WriteLine();
@@ -207,6 +207,9 @@ void MainHandler(
     string[] pfxs,
     FileInfo? logf)
 {
+    // 构建映射组件
+    Mapping mapping = new(sharedConfig == null ? [] : sharedConfig.mapping);
+
     // 构建 I/O 组件
     IO io = new()
     {
@@ -238,7 +241,7 @@ void MainHandler(
     io.WriteText("Current     : " + dev.ToString());
 
     // 构建 PL 组件与输出通道
-    PL? pl = ple ? new PL() : null;
+    PL? pl = ple ? new PL(mapping) : null;
     pl?.Add(list);
     Func<string> plnx = pl is null ?
         () => list[Random.Shared.Next(list.Length)] :
@@ -268,18 +271,32 @@ void MainHandler(
         };
 
     // 构建主控制器
-    Controller ctrl = new(player, exnx);
+    Controller ctrl = new(player, exnx, mapping);
+
+    // 将 PL 组件连接到控制器
+    if(pl is not null)
+    {
+        ctrl.OnNext += (s, _) => pl.SetLast(s);
+    }
 
     // 将 PB 组件连接到控制器
     if (pb is not null)
     {
         ctrl.OnSec += pb.Inc_2;
-        ctrl.BeforeNext += (_) => pb.Save();
+        ctrl.BeforeNext += (_, _) => pb.Save();
         OnExit += (_) => pb.Save();
     }
 
     // 历史记录输出
-    ctrl.OnNext += (s) => io.WriteHistory(Path.GetFileNameWithoutExtension(s));
+    ctrl.OnNext += (s, m) =>
+    {
+        io.WriteHistory(PB.NameOf(s));
+        if (s != m)
+        {
+            io.WriteText($"[        ] from {m}");
+        }
+    };
+
     // 退出流程
     ctrl.OnStop += () => Exit(0);
 

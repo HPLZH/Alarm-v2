@@ -1,13 +1,16 @@
 ﻿namespace Alarm_v2
 {
-    public class Controller(Player player, Func<string> next)
+    public class Controller(Player player, Func<string> next, Mapping mapping)
     {
         public Func<string> Next { get; set; } = next;
         public Player Player { get; init; } = player;
 
-        public event Action<string> OnSec = (_) => { };
-        public event Action<string> OnNext = (_) => { };
-        public event Action<string> BeforeNext = (_) => { };
+        /// <summary>
+        /// 参数：文件路径，映射名
+        /// </summary>
+        public event Action<string, string> OnSec = (_, _) => { };
+        public event Action<string, string> OnNext = (_, _) => { };
+        public event Action<string, string> BeforeNext = (_, _) => { };
         public event Action OnStop = () => { };
 
         bool stopCur = false;
@@ -20,12 +23,13 @@
                 while (!stopLoop)
                 {
                     string fp = Next();
-                    OnNext.Invoke(fp);
-                    Player.Play(fp);
+                    string rfp = mapping.ResolveR(fp);
+                    OnNext.Invoke(rfp, fp);
+                    Player.Play(rfp);
                     while (Player.PlaybackState == NAudio.Wave.PlaybackState.Playing)
                     {
                         await Task.Delay(1000);
-                        OnSec.Invoke(fp);
+                        OnSec.Invoke(rfp, fp);
                         if (stopCur || stopLoop)
                         {
                             break;
@@ -33,7 +37,7 @@
                     }
                     Player.Stop();
                     stopCur = false;
-                    BeforeNext.Invoke(fp);
+                    BeforeNext.Invoke(rfp, fp);
                     await Task.Delay(1000);
                 }
                 OnStop.Invoke();

@@ -48,10 +48,14 @@ namespace Alarm_v2
 
         public IEnumerable<string> Map(IEnumerable<string> list)
         {
+            HashSet<string> ret = [];
             foreach(var k in list)
             {
                 Map(k, out var v);
-                yield return v;
+                if (ret.Add(v))
+                {
+                    yield return v;
+                }
             }
         }
 

@@ -218,6 +218,7 @@ void MainHandler(
 
     // 读列表
     string[] list = M3u8.ReadList(lf.FullName);
+    Random.Shared.Shuffle(list);
 
     // 初始化播放器
     bool devex = false;

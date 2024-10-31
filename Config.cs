@@ -32,6 +32,8 @@ namespace Alarm_v2
         public Shell? shell = null;
         public ExtraContent[] extra = [];
 
+        public Dictionary<string, string> mapping = [];
+
         public Config() { }
 
         public static Config? Deserialize(FileInfo file)

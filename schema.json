@@ -105,6 +105,9 @@
                     "content"
                 ]
             }
+        },
+        "mapping": {
+            "type": "object"
         }
     },
     "required": [
